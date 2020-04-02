@@ -170,6 +170,7 @@ public class FXMLController {
 			}
 			else {
 				
+				
 				this.txtRisultato.appendText("Matricola non presente nel database!");
 				return;
 				
