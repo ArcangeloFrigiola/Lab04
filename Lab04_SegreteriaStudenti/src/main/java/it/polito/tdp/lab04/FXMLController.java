@@ -6,6 +6,8 @@ package it.polito.tdp.lab04;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.lab04.model.Corso;
@@ -65,70 +67,125 @@ public class FXMLController {
     @FXML
     void doCercaCorsi(ActionEvent event) {
 
+    	this.txtRisultato.clear();
+    	int matricola = controllaMatricola(this.txtMatricola.getText());
+		if (matricola > 0) {
+
+			try {
+
+				List<Corso> listaCorsi = new LinkedList<>(this.model.getCorsiDaMatricola(matricola));
+
+				if (!listaCorsi.isEmpty()) {
+					this.txtRisultato.appendText("Corsi seguiti dalla matricola " + matricola + ":\n");
+					for (Corso c : listaCorsi) {
+						this.txtRisultato.appendText(c.descriviCorso());
+					}
+				} else {
+					this.txtRisultato.appendText("Errore, nessun corso trovato per la matricola " + matricola + "\n");
+				}
+			} catch (NullPointerException npe) {
+				this.txtRisultato.appendText("Matricola non assegnata ad alcun corso!");
+				return;
+			}
+
+    	}
+    	
     	
     }
 
-    @FXML
-    void doCompletaAutomaticamente(ActionEvent event) {
+	@FXML
+	void doCompletaAutomaticamente(ActionEvent event) {
 
-		try {
-			
-			this.txtRisultato.clear();
-			this.txtCognome.clear();
-			this.txtNome.clear();
-			int matricola = Integer.parseInt(this.txtMatricola.getText());
-			if(matricola<0) {
-				
-				this.txtRisultato.appendText("Formato matricola errato: inserire valori positivi");
-				return;
-				
-				
-			}else if(this.txtMatricola.getText().length()>6) {
-				
-				this.txtRisultato.appendText("Formato matricola errato: inserire massimo 6 cifre");
-				return;
-				
-			}
+		this.txtRisultato.clear();
+		this.txtCognome.clear();
+		this.txtNome.clear();
+
+		int matricola = controllaMatricola(this.txtMatricola.getText());
+		if (matricola > 0) {
 			Studente temp = model.getNomeCognomeStudenteDaMatricola(matricola);
-			if(temp==null) {
+			if (temp == null) {
 				this.txtRisultato.appendText("Matricola non presente nel Database");
 				return;
 			}
 			this.txtCognome.setText(temp.getCognome());
 			this.txtNome.setText(temp.getNome());
 			return;
-			
-		} catch (NumberFormatException nfe) {
-
-			this.txtRisultato.appendText("Formato matricola errato: inserire solo valori numerici");
-			return;
 		}
+		return;
 
-    }
+	}
     
-    @FXML
-    void doCercaIscrittiCorso(ActionEvent event) {
+	@FXML
+	void doCercaIscrittiCorso(ActionEvent event) {
 
-    	try {
-    	ArrayList<Studente> listaStudenti = new ArrayList<>(model.getListaStudentiDaCorso(this.boxCorsi.getValue().getCodins()));
-    
-    	this.txtRisultato.clear();
-    	for(Studente s: listaStudenti) {
-    		this.txtRisultato.appendText(s.toString());
-    	}
-    	}catch(NullPointerException npe) {
-    		this.txtRisultato.appendText("Scegliere un corso dal menù a tendina!");
-    	}
-    }
+		String matricola = this.txtMatricola.getText();
+		if (matricola.compareTo("")!=0) {
+
+			int mtr =controllaMatricola(matricola);
+			if(mtr>0) {
+				
+				if(model.getMatchMatricolaCorso(mtr, this.boxCorsi.getValue())) {
+					
+					this.txtRisultato.appendText("Studente già iscritto a questo corso");
+				}
+				else {
+					this.txtRisultato.appendText("Studente non iscritto a questo corso");
+				}
+			}
+			
+			
+		} else {
+			try {
+				List<Studente> listaStudenti = new ArrayList<>(
+						model.getListaStudentiDaCorso(this.boxCorsi.getValue().getCodins()));
+
+				this.txtRisultato.clear();
+				for (Studente s : listaStudenti) {
+					this.txtRisultato.appendText(s.toString());
+				}
+			} catch (NullPointerException npe) {
+				this.txtRisultato.appendText("Scegliere un corso dal menù a tendina!");
+			}
+		}
+	}
 
     @FXML
     void doIscrivi(ActionEvent event) {
 
-    }
+    	this.txtRisultato.clear();
+		int mtr = controllaMatricola(this.txtMatricola.getText());
+		if (mtr > 0) {
+			/**
+			 * Controllo che la matricola esista
+			 */
+			if (this.model.getNomeCognomeStudenteDaMatricola(mtr) != null) {
+				if (this.model.iscriviStudenteAlCorso(mtr, this.boxCorsi.getValue())) {
+					
+				this.txtRisultato.appendText("Studente con matricola " + mtr + " correttamente iscritto al corso");
+				return;
+				}else {
+					this.txtRisultato.appendText("Studente già iscritto a questo corso!");
+					return;
+				}
+			}
+			else {
+				
+				this.txtRisultato.appendText("Matricola non presente nel database!");
+				return;
+				
+			}
+		} 
+
+	}
 
     @FXML
     void doReset(ActionEvent event) {
 
+    	this.txtRisultato.clear();
+    	this.txtCognome.clear();
+		this.txtNome.clear();
+		this.txtMatricola.clear();
+		
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -149,4 +206,29 @@ public class FXMLController {
         this.boxCorsi.converterProperty();
         
     }
+    
+    public int controllaMatricola(String matricola) {
+    	
+		try {
+			int mtr = Integer.parseInt(matricola);
+			if (mtr < 0) {
+
+				this.txtRisultato.appendText("Formato matricola errato: inserire valori positivi");
+				return -1;
+
+			} else if (this.txtMatricola.getText().length() > 6) {
+
+				this.txtRisultato.appendText("Formato matricola errato: inserire massimo 6 cifre");
+				return -1;
+
+			}
+			
+			return mtr;
+		} catch (NumberFormatException nfe) {
+
+			this.txtRisultato.appendText("Formato matricola errato: inserire solo valori numerici");
+			return -1;
+		}
+
+	}
 }

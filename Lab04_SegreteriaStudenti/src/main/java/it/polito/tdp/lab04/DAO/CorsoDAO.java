@@ -57,6 +57,56 @@ public class CorsoDAO {
 	
 	
 	/*
+	 * Data una matricola, ricevo i corsi che segue
+	 */
+	
+	public List<Corso> getCorsiDaMatricola(int matricola) {
+
+		final String sql = "SELECT *\r\n" + 
+				"FROM corso\r\n" + 
+				"WHERE codins IN (SELECT codins\r\n" + 
+				"                 FROM iscrizione\r\n" + 
+				"				     WHERE matricola = ?)";
+
+		List<Corso> corsi = new LinkedList<Corso>();
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			
+			st.setInt(1, matricola);
+
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+
+				String codins = rs.getString("codins");
+				int numeroCrediti = rs.getInt("crediti");
+				String nome = rs.getString("nome");
+				int periodoDidattico = rs.getInt("pd");
+
+				System.out.println("Corsi della matricola "+ matricola +"\n"+codins + " " + numeroCrediti + " " + nome + " " + periodoDidattico);
+
+				// Crea un nuovo JAVA Bean Corso
+				// Aggiungi il nuovo oggetto Corso alla lista corsi
+				
+				Corso tempC = new Corso(codins, numeroCrediti, nome, periodoDidattico);
+				corsi.add(tempC);
+				
+			}
+
+			conn.close();
+			
+			return corsi;
+			
+
+		} catch (SQLException e) {
+			// e.printStackTrace();
+			throw new RuntimeException("Errore Db", e);
+		}
+	}
+	
+	/*
 	 * Dato un codice insegnamento, ottengo il corso
 	 */
 	public void getCorso(Corso corso) {
@@ -73,10 +123,47 @@ public class CorsoDAO {
 	/*
 	 * Data una matricola ed il codice insegnamento, iscrivi lo studente al corso.
 	 */
-	public boolean inscriviStudenteACorso(Studente studente, Corso corso) {
+	
+	public boolean inscriviStudenteACorso(int matricola, Corso corso) {
 		// TODO
 		// ritorna true se l'iscrizione e' avvenuta con successo
-		return false;
+		
+		
+		final String sql = "INSERT INTO iscrizione\r\n" + 
+				"(\r\n" + 
+				"   matricola,\r\n" + 
+				"   codins\r\n" + 
+				")\r\n" + 
+				"VALUES\r\n" + 
+				"(\r\n" + 
+				"   ?,\r\n" + 
+				"   ?\r\n" + 
+				")";
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			
+			st.setInt(1, matricola);
+			st.setString(2, corso.getCodins());
+
+			ResultSet rs = st.executeQuery();
+
+			conn.close();
+			
+			return true;
+			
+
+		} catch (SQLException e) {
+			// e.printStackTrace();
+			return false;
+		}
 	}
 
 }
+
+
+
+
+
+

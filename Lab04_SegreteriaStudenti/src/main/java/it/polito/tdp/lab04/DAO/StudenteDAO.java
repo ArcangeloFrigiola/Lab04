@@ -13,7 +13,7 @@ public class StudenteDAO {
 
 	
 	/*
-	 * Data la matricola, restituisco lo stdudete
+	 * Data la matricola, restituisco lo studente
 	 */
 	
 	public Studente getStudenteDaMatricola(int matricola){
@@ -57,11 +57,12 @@ public class StudenteDAO {
 	/*
 	 * Dato un corso, restituisce i rispettivi studenti
 	 */
+	
 	public List<Studente> getStudenteDaCorso(String codins){
 		
 		final String sql = "SELECT * FROM studente WHERE matricola IN ( SELECT matricola FROM iscrizione WHERE codins = ?)";
 
-		ArrayList<Studente> listaStudenti = new ArrayList<>();
+		List<Studente> listaStudenti = new ArrayList<>();
 		
 		try {
 			Connection conn = ConnectDB.getConnection();

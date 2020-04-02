@@ -37,4 +37,33 @@ public class Model {
 		
 		return this.daoS.getStudenteDaCorso(codins);
 	}
+	
+	public List<Corso> getCorsiDaMatricola(int matricola){
+		 return this.daoC.getCorsiDaMatricola(matricola);
+	}
+	
+	public boolean getMatchMatricolaCorso(int matricola, Corso corso) {
+		
+		List<Studente> listaStudenti = new ArrayList<>(this.daoS.getStudenteDaCorso(corso.getCodins()));
+		
+		for(Studente s: listaStudenti) {
+			if(s.equals(this.daoS.getStudenteDaMatricola(matricola))) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean iscriviStudenteAlCorso(int matricola, Corso corso) {
+		
+		/**
+		 * Controllo che lo studente non sia già iscritto
+		 */
+		if (getMatchMatricolaCorso(matricola, corso)) {
+			return false;
+		} else {
+			this.daoC.inscriviStudenteACorso(matricola, corso);
+			return true;
+		}
+	}
 }
