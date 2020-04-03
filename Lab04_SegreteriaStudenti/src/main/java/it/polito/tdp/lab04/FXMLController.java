@@ -64,6 +64,11 @@ public class FXMLController {
     @FXML // fx:id="txtRisultato"
     private TextArea txtRisultato; // Value injected by FXMLLoader
     
+    /**
+     * Aggiungo un commento per cercare di fare COMMIT AND PUSH su GITHUB
+     * 
+     */
+    
     @FXML
     void doCercaCorsi(ActionEvent event) {
 
