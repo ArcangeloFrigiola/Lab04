@@ -66,6 +66,7 @@ public class FXMLController {
     
     /**
      * Aggiungo un commento per cercare di fare COMMIT AND PUSH su GITHUB
+     * Non riesco a caricarlo
      * 
      */
     
@@ -153,7 +154,7 @@ public class FXMLController {
 			}
 		}
 	}
-
+	
     @FXML
     void doIscrivi(ActionEvent event) {
 
